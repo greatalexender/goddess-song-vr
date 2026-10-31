@@ -1,0 +1,64 @@
+<!--
+  星光庭院小面板：立在 AI 星光庭院南缘、朝花园中心，来客走近微光时读到。
+  文案（本阶段定版）：「它可以不回答每一个问题。」纯展示面板，无按钮；
+  排版沿用 serpent 面板的量级。
+-->
+<style>
+  .starlight-root {
+    flex-direction: column;
+    width: 520px;
+  }
+
+  .starlight-content {
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    padding-top: 22px;
+    padding-bottom: 22px;
+    padding-left: 26px;
+    padding-right: 26px;
+  }
+
+  .starlight-line {
+    color: #1c1d20;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 40px;
+    text-align: center;
+  }
+
+  .starlight-line:dark {
+    color: #fafaf7;
+  }
+
+  .starlight-sub {
+    color: #3a3b40;
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: 0.6px;
+    text-align: center;
+  }
+
+  .starlight-sub:dark {
+    color: #c9c4b4;
+  }
+
+  .starlight-fallback {
+    color: #6a675c;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+
+  .starlight-fallback:dark {
+    color: #9d988a;
+  }
+</style>
+<Panel class="starlight-root">
+  <div class="starlight-content">
+    <div class="starlight-line">它可以不回答每一个问题</div>
+    <div class="starlight-sub">It doesn't have to answer every question.</div>
+    <div class="starlight-fallback">手势识别不到时，捏合并保持 2 秒推进 · If a gesture is missed, pinch and hold for 2 seconds.</div>
+  </div>
+</Panel>

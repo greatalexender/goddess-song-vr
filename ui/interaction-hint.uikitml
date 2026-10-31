@@ -1,0 +1,52 @@
+<!--
+  兜底提示小面板：莲花亭没有自己的文案面板，借这一块只写手势的
+  兜底方式（捏合长按 2 秒推进），中英文各一行。纯展示，无按钮。
+  其余空间的兜底行直接写在各自面板的角落里（gate / bench /
+  serpent / starlight / welcome）；归于宁静按设计无字，不放。
+-->
+<style>
+  .hint-root {
+    flex-direction: column;
+    width: 460px;
+  }
+
+  .hint-content {
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .hint-line {
+    color: #1c1d20;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 26px;
+    text-align: center;
+  }
+
+  .hint-line:dark {
+    color: #fafaf7;
+  }
+
+  .hint-sub {
+    color: #3a3b40;
+    font-size: 13px;
+    line-height: 18px;
+    letter-spacing: 0.4px;
+    text-align: center;
+  }
+
+  .hint-sub:dark {
+    color: #c9c4b4;
+  }
+</style>
+<Panel class="hint-root">
+  <div class="hint-content">
+    <div class="hint-line">手势识别不到时，捏合并保持 2 秒推进</div>
+    <div class="hint-sub">If a gesture is missed, pinch and hold for 2 seconds.</div>
+  </div>
+</Panel>
