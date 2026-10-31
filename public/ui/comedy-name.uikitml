@@ -1,0 +1,64 @@
+<!--
+  每日一笑馆馆名小面板：立在馆门外来客一侧。文案（本阶段定版）：
+  馆名 + 英文名 + 一句引子——语气与音乐亭、长椅面板同调：只邀
+  请，不催促。纯展示面板，无按钮；排版沿用 music 面板的量级。
+-->
+<style>
+  .comedy-name-root {
+    flex-direction: column;
+    width: 520px;
+  }
+
+  .comedy-name-content {
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    padding-top: 22px;
+    padding-bottom: 22px;
+    padding-left: 26px;
+    padding-right: 26px;
+  }
+
+  .comedy-name-line {
+    color: #1c1d20;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 40px;
+    text-align: center;
+  }
+
+  .comedy-name-line:dark {
+    color: #fafaf7;
+  }
+
+  .comedy-name-sub {
+    color: #3a3b40;
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: 0.6px;
+    text-align: center;
+  }
+
+  .comedy-name-sub:dark {
+    color: #c9c4b4;
+  }
+
+  .comedy-name-intro {
+    color: #6a675c;
+    font-size: 13px;
+    line-height: 18px;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+
+  .comedy-name-intro:dark {
+    color: #9d988a;
+  }
+</style>
+<Panel class="comedy-name-root">
+  <div class="comedy-name-content">
+    <div class="comedy-name-line">每日一笑馆</div>
+    <div class="comedy-name-sub">The Daily Laughter Hall</div>
+    <div class="comedy-name-intro">咱们做过的笑话都在这里，进来坐，慢慢看。All the jokes we've made live here — come in, sit, take your time.</div>
+  </div>
+</Panel>

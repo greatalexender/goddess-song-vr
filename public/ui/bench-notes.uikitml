@@ -1,0 +1,137 @@
+<!--
+  长椅留言面板：平时不存在（BenchNotesSystem 把整块面板藏起），
+  只有自由回访模式下注视椅面之下的微光标记才展开。面板里是椅子
+  底下历来的字条（种子 + 本机访客留的，合并规则见
+  src/spaces/bench-notes.ts），以及 6 句预置短句供点选留言——
+  头显内文本输入 v1 不做，不为输入法新造轮子。同一份字条数据另
+  有机器可读层（public/bench-notes.json +
+  window.__EDEN_BENCH_NOTES__），是留给智能体的门。
+  字条槽位固定 8 个（note-1..note-8），系统按合并顺序填，多出的
+  在 notes-more 一行报数；预置按钮 preset-1..preset-6 的文案由
+  系统从 BENCH_NOTE_PRESETS 写入，这里只留骨架。
+-->
+<style>
+  .notes-root {
+    flex-direction: column;
+    width: 640px;
+  }
+
+  .notes-content {
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 22px;
+    padding-bottom: 22px;
+    padding-left: 26px;
+    padding-right: 26px;
+  }
+
+  .notes-title {
+    color: #1c1d20;
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 32px;
+    text-align: center;
+  }
+
+  .notes-title:dark {
+    color: #fafaf7;
+  }
+
+  .notes-sub {
+    color: #3a3b40;
+    font-size: 14px;
+    line-height: 19px;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  .notes-sub:dark {
+    color: #c9c4b4;
+  }
+
+  .note {
+    color: #2c2a26;
+    font-size: 16px;
+    line-height: 22px;
+    text-align: left;
+  }
+
+  .note:dark {
+    color: #e8e2d2;
+  }
+
+  .notes-more {
+    color: #6a675c;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+  }
+
+  .notes-more:dark {
+    color: #9d988a;
+  }
+
+  .notes-leave {
+    color: #3a3b40;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 19px;
+    text-align: center;
+    margin-top: 6px;
+  }
+
+  .notes-leave:dark {
+    color: #c9c4b4;
+  }
+
+  .preset {
+    justify-content: flex-start;
+  }
+
+  .preset-label {
+    transform-translate-y: 1px;
+    font-size: 15px;
+  }
+
+  .close-label {
+    transform-translate-y: 1px;
+    font-size: 14px;
+  }
+</style>
+<Panel class="notes-root">
+  <div class="notes-content">
+    <div class="notes-title">长椅下的字条</div>
+    <div class="notes-sub">Notes beneath the bench — left by whoever sat here.</div>
+    <div id="note-1" class="note" style="display: none"></div>
+    <div id="note-2" class="note" style="display: none"></div>
+    <div id="note-3" class="note" style="display: none"></div>
+    <div id="note-4" class="note" style="display: none"></div>
+    <div id="note-5" class="note" style="display: none"></div>
+    <div id="note-6" class="note" style="display: none"></div>
+    <div id="note-7" class="note" style="display: none"></div>
+    <div id="note-8" class="note" style="display: none"></div>
+    <div id="notes-more" class="notes-more" style="display: none"></div>
+    <div class="notes-leave">留一张字条 · Leave a note</div>
+    <Button id="preset-1" class="preset">
+      <ButtonLabel id="preset-label-1" class="preset-label"></ButtonLabel>
+    </Button>
+    <Button id="preset-2" class="preset">
+      <ButtonLabel id="preset-label-2" class="preset-label"></ButtonLabel>
+    </Button>
+    <Button id="preset-3" class="preset">
+      <ButtonLabel id="preset-label-3" class="preset-label"></ButtonLabel>
+    </Button>
+    <Button id="preset-4" class="preset">
+      <ButtonLabel id="preset-label-4" class="preset-label"></ButtonLabel>
+    </Button>
+    <Button id="preset-5" class="preset">
+      <ButtonLabel id="preset-label-5" class="preset-label"></ButtonLabel>
+    </Button>
+    <Button id="preset-6" class="preset">
+      <ButtonLabel id="preset-label-6" class="preset-label"></ButtonLabel>
+    </Button>
+    <Button id="close-button" class="preset">
+      <ButtonLabel class="close-label">收起 · Put it back</ButtonLabel>
+    </Button>
+  </div>
+</Panel>

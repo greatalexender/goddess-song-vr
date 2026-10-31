@@ -1,0 +1,92 @@
+<!--
+  Panel, Button, ButtonIcon, and ButtonLabel come from the bundled Horizon kit.
+  RectangleGoggles and LogIn are bundled Lucide icon components. The :dark
+  styles apply because iwsdk.config.json prefers the dark color scheme.
+-->
+<style>
+  .panel-root {
+    flex-direction: column;
+    width: 420px;
+  }
+
+  .panel-content {
+    flex-direction: column;
+    gap: 7px;
+    padding: 22px;
+  }
+
+  .eyebrow {
+    color: #6b5a00;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+  }
+
+  .eyebrow:dark {
+    color: #f5d90a;
+  }
+
+  .heading {
+    color: #1c1d20;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 36px;
+  }
+
+  .heading:dark {
+    color: #fafaf7;
+  }
+
+  .body {
+    color: #3a3b40;
+    font-size: 20px;
+    line-height: 27px;
+  }
+
+  .body:dark {
+    color: #dddfe3;
+  }
+
+  .button {
+    justify-content: flex-start;
+    margin-left: 22px;
+    margin-right: 22px;
+    margin-bottom: 22px;
+  }
+
+  .button-label {
+    transform-translate-y: 1px;
+  }
+
+  .fallback {
+    color: #6a675c;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.3px;
+  }
+
+  .fallback:dark {
+    color: #9d988a;
+  }
+</style>
+<Panel class="panel-root">
+  <div class="panel-content">
+    <div class="eyebrow">THE GODDESS'S SONG</div>
+    <div class="heading">Lalita · A Lamp in the Darkness</div>
+    <div class="body">无明中的一盏灯。</div>
+    <div class="body">戴上头显，进入花园，站在灯前听完整首歌。</div>
+    <div class="fallback">手势识别不到时，捏合并保持 2 秒推进 · If a gesture is missed, pinch and hold for 2 seconds.</div>
+  </div>
+  <Button id="xr-button" class="button">
+    <ButtonIcon>
+      <RectangleGoggles></RectangleGoggles>
+    </ButtonIcon>
+    <ButtonLabel class="button-label">Enter XR</ButtonLabel>
+  </Button>
+  <Button id="exit-button" class="button" style="display: none">
+    <ButtonIcon>
+      <LogIn></LogIn>
+    </ButtonIcon>
+    <ButtonLabel class="button-label">Exit to Browser</ButtonLabel>
+  </Button>
+</Panel>

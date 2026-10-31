@@ -1,0 +1,127 @@
+<!--
+  每日一笑馆选集面板：立在馆内，面对银幕一侧。目录来自
+  public/comedy-catalog.json（数据驱动：加新集只改 JSON），
+  ComedyCatalogSystem 按页把条目填进 6 个固定槽位
+  （ep-1..ep-6，标签 ep-label-1..ep-label-6），翻页用
+  page-prev / page-next，页码写在 catalog-page。点选一集 →
+  银幕亮标题卡（点播待公开托管，见 comedy-catalog.ts 的
+  presentEpisode 扩展点）。这里只留骨架，文案事实来源在数据层。
+-->
+<style>
+  .catalog-root {
+    flex-direction: column;
+    width: 560px;
+  }
+
+  .catalog-content {
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 22px;
+    padding-bottom: 22px;
+    padding-left: 26px;
+    padding-right: 26px;
+  }
+
+  .catalog-title {
+    color: #1c1d20;
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 32px;
+    text-align: center;
+  }
+
+  .catalog-title:dark {
+    color: #fafaf7;
+  }
+
+  .catalog-sub {
+    color: #3a3b40;
+    font-size: 14px;
+    line-height: 19px;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  .catalog-sub:dark {
+    color: #c9c4b4;
+  }
+
+  .catalog-ep {
+    display: none;
+    justify-content: flex-start;
+  }
+
+  .catalog-ep-label {
+    transform-translate-y: 1px;
+    font-size: 15px;
+  }
+
+  .catalog-pager {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+  }
+
+  .catalog-page {
+    color: #6a675c;
+    font-size: 13px;
+    line-height: 18px;
+    text-align: center;
+  }
+
+  .catalog-page:dark {
+    color: #9d988a;
+  }
+
+  .catalog-pager-label {
+    transform-translate-y: 1px;
+    font-size: 14px;
+  }
+
+  .catalog-hint {
+    color: #6a675c;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+
+  .catalog-hint:dark {
+    color: #9d988a;
+  }
+</style>
+<Panel class="catalog-root">
+  <div class="catalog-content">
+    <div class="catalog-title">选集 · 节目单</div>
+    <div class="catalog-sub">Pick an episode — the screen will light up with its title card.</div>
+    <Button id="ep-1" class="catalog-ep">
+      <ButtonLabel id="ep-label-1" class="catalog-ep-label"></ButtonLabel>
+    </Button>
+    <Button id="ep-2" class="catalog-ep">
+      <ButtonLabel id="ep-label-2" class="catalog-ep-label"></ButtonLabel>
+    </Button>
+    <Button id="ep-3" class="catalog-ep">
+      <ButtonLabel id="ep-label-3" class="catalog-ep-label"></ButtonLabel>
+    </Button>
+    <Button id="ep-4" class="catalog-ep">
+      <ButtonLabel id="ep-label-4" class="catalog-ep-label"></ButtonLabel>
+    </Button>
+    <Button id="ep-5" class="catalog-ep">
+      <ButtonLabel id="ep-label-5" class="catalog-ep-label"></ButtonLabel>
+    </Button>
+    <Button id="ep-6" class="catalog-ep">
+      <ButtonLabel id="ep-label-6" class="catalog-ep-label"></ButtonLabel>
+    </Button>
+    <div class="catalog-pager">
+      <Button id="page-prev">
+        <ButtonLabel class="catalog-pager-label">← 上一页</ButtonLabel>
+      </Button>
+      <div id="catalog-page" class="catalog-page"></div>
+      <Button id="page-next">
+        <ButtonLabel class="catalog-pager-label">下一页 →</ButtonLabel>
+      </Button>
+    </div>
+    <div class="catalog-hint">点播将于公开托管后开放 · Playback opens after public hosting.</div>
+  </div>
+</Panel>

@@ -1,0 +1,64 @@
+<!--
+  每日一笑馆银幕标题卡：贴在银幕网格（comedy-screen）正前方，
+  与银幕同尺寸感的一块深色面板。未选片时是节目单占位；点选
+  一集后 ComedyCatalogSystem 把该集标题写进 screen-title、
+  系列·集号写进 screen-sub、开放提示写进 screen-note（经
+  comedy-catalog.ts 的 presentEpisode——全馆唯一的播放源
+  接口）。将来托管视频纹理挂上银幕时，本面板即退为开播前的
+  标题卡，不用改。
+-->
+<style>
+  .screen-root {
+    flex-direction: column;
+    width: 340px;
+  }
+
+  .screen-content {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 190px;
+    padding-left: 20px;
+    padding-right: 20px;
+    background-color: #10142a;
+  }
+
+  .screen-kicker {
+    color: #8f97b8;
+    font-size: 13px;
+    line-height: 18px;
+    letter-spacing: 2px;
+    text-align: center;
+  }
+
+  .screen-title {
+    color: #f2ead2;
+    font-size: 27px;
+    font-weight: 700;
+    line-height: 36px;
+    text-align: center;
+  }
+
+  .screen-sub {
+    color: #c9c4b4;
+    font-size: 15px;
+    line-height: 21px;
+    text-align: center;
+  }
+
+  .screen-note {
+    color: #8f97b8;
+    font-size: 12px;
+    line-height: 17px;
+    text-align: center;
+  }
+</style>
+<Panel class="screen-root">
+  <div class="screen-content">
+    <div class="screen-kicker">每日一笑馆 · 节目单</div>
+    <div id="screen-title" class="screen-title">选一集，坐下来笑一会儿</div>
+    <div id="screen-sub" class="screen-sub">Pick an episode from the catalog, and take a seat.</div>
+    <div id="screen-note" class="screen-note"></div>
+  </div>
+</Panel>

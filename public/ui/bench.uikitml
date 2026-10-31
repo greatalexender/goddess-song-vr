@@ -1,0 +1,64 @@
+<!--
+  长椅小面板：立在真曦的长椅上方偏园心一侧，来客走近先读到这句。
+  文案（本阶段定版）：「坐一会儿，不用说什么。」纯展示面板，无按钮；
+  排版沿用 gate 面板的量级，字号略小，与「静」的段落气质相配。
+-->
+<style>
+  .bench-root {
+    flex-direction: column;
+    width: 520px;
+  }
+
+  .bench-content {
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    padding-top: 22px;
+    padding-bottom: 22px;
+    padding-left: 26px;
+    padding-right: 26px;
+  }
+
+  .bench-line {
+    color: #1c1d20;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 40px;
+    text-align: center;
+  }
+
+  .bench-line:dark {
+    color: #fafaf7;
+  }
+
+  .bench-sub {
+    color: #3a3b40;
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: 0.6px;
+    text-align: center;
+  }
+
+  .bench-sub:dark {
+    color: #c9c4b4;
+  }
+
+  .bench-fallback {
+    color: #6a675c;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+
+  .bench-fallback:dark {
+    color: #9d988a;
+  }
+</style>
+<Panel class="bench-root">
+  <div class="bench-content">
+    <div class="bench-line">坐一会儿，不用说什么</div>
+    <div class="bench-sub">Sit a while. Nothing needs to be said.</div>
+    <div class="bench-fallback">手势识别不到时，捏合并保持 2 秒推进 · If a gesture is missed, pinch and hold for 2 seconds.</div>
+  </div>
+</Panel>
