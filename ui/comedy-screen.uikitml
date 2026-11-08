@@ -8,6 +8,9 @@
   标题卡，不用改。
 -->
 <style>
+  @font-face { font-family: "noto-sans-sc"; src: url("../fonts/noto-sans-sc-regular.ttf"); font-weight: normal; }
+  @font-face { font-family: "noto-sans-sc"; src: url("../fonts/noto-sans-sc-bold.ttf"); font-weight: bold; }
+
   .screen-root {
     flex-direction: column;
     width: 340px;
@@ -25,6 +28,7 @@
   }
 
   .screen-kicker {
+    font-family: noto-sans-sc;
     color: #8f97b8;
     font-size: 13px;
     line-height: 18px;
@@ -33,6 +37,7 @@
   }
 
   .screen-title {
+    font-family: noto-sans-sc;
     color: #f2ead2;
     font-size: 27px;
     font-weight: 700;
@@ -41,6 +46,7 @@
   }
 
   .screen-sub {
+    font-family: noto-sans-sc;
     color: #c9c4b4;
     font-size: 15px;
     line-height: 21px;
@@ -48,6 +54,7 @@
   }
 
   .screen-note {
+    font-family: noto-sans-sc;
     color: #8f97b8;
     font-size: 12px;
     line-height: 17px;

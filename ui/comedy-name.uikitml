@@ -4,6 +4,9 @@
   请，不催促。纯展示面板，无按钮；排版沿用 music 面板的量级。
 -->
 <style>
+  @font-face { font-family: "noto-sans-sc"; src: url("../fonts/noto-sans-sc-regular.ttf"); font-weight: normal; }
+  @font-face { font-family: "noto-sans-sc"; src: url("../fonts/noto-sans-sc-bold.ttf"); font-weight: bold; }
+
   .comedy-name-root {
     flex-direction: column;
     width: 520px;
@@ -20,6 +23,7 @@
   }
 
   .comedy-name-line {
+    font-family: noto-sans-sc;
     color: #1c1d20;
     font-size: 30px;
     font-weight: 700;
@@ -44,6 +48,7 @@
   }
 
   .comedy-name-intro {
+    font-family: noto-sans-sc;
     color: #6a675c;
     font-size: 13px;
     line-height: 18px;

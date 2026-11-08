@@ -4,6 +4,9 @@
   styles apply because iwsdk.config.json prefers the dark color scheme.
 -->
 <style>
+  @font-face { font-family: "noto-sans-sc"; src: url("../fonts/noto-sans-sc-regular.ttf"); font-weight: normal; }
+  @font-face { font-family: "noto-sans-sc"; src: url("../fonts/noto-sans-sc-bold.ttf"); font-weight: bold; }
+
   .panel-root {
     flex-direction: column;
     width: 420px;
@@ -38,6 +41,7 @@
   }
 
   .body {
+    font-family: noto-sans-sc;
     color: #3a3b40;
     font-size: 20px;
     line-height: 27px;
@@ -59,6 +63,7 @@
   }
 
   .fallback {
+    font-family: noto-sans-sc;
     color: #6a675c;
     font-size: 12px;
     line-height: 16px;

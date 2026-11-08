@@ -11,6 +11,9 @@
   系统从 BENCH_NOTE_PRESETS 写入，这里只留骨架。
 -->
 <style>
+  @font-face { font-family: "noto-sans-sc"; src: url("../fonts/noto-sans-sc-regular.ttf"); font-weight: normal; }
+  @font-face { font-family: "noto-sans-sc"; src: url("../fonts/noto-sans-sc-bold.ttf"); font-weight: bold; }
+
   .notes-root {
     flex-direction: column;
     width: 640px;
@@ -26,6 +29,7 @@
   }
 
   .notes-title {
+    font-family: noto-sans-sc;
     color: #1c1d20;
     font-size: 25px;
     font-weight: 700;
@@ -50,6 +54,7 @@
   }
 
   .note {
+    font-family: noto-sans-sc;
     color: #2c2a26;
     font-size: 16px;
     line-height: 22px;
@@ -61,6 +66,7 @@
   }
 
   .notes-more {
+    font-family: noto-sans-sc;
     color: #6a675c;
     font-size: 12px;
     line-height: 16px;
@@ -72,6 +78,7 @@
   }
 
   .notes-leave {
+    font-family: noto-sans-sc;
     color: #3a3b40;
     font-size: 14px;
     font-weight: 700;
@@ -89,11 +96,13 @@
   }
 
   .preset-label {
+    font-family: noto-sans-sc;
     transform-translate-y: 1px;
     font-size: 15px;
   }
 
   .close-label {
+    font-family: noto-sans-sc;
     transform-translate-y: 1px;
     font-size: 14px;
   }
