@@ -12,6 +12,7 @@ import { ArcSystem } from './spaces/arc-system.js';
 import { MeditationSystem } from './spaces/meditation-system.js';
 import { BenchNotesSystem } from './spaces/bench-notes-system.js';
 import { ComedyCatalogSystem } from './spaces/comedy-catalog-system.js';
+import { CjkFontSystem } from './cjk-font.js';
 
 World.create(
   document.getElementById('scene-container') as HTMLDivElement,
@@ -33,5 +34,8 @@ World.create(
   // （public/comedy-catalog.json）、填选集面板、点选后经
   // presentEpisode 把标题卡交给银幕（点播待公开托管）。
   world.registerSystem(ComedyCatalogSystem);
+  // CjkFontSystem（中文字体注册）：把预生成的 Noto Sans SC 子集
+  // MSDF 图集注入各面板根元素，修复中文白方块（见 cjk-font.ts）。
+  world.registerSystem(CjkFontSystem);
   // 后续系统在此登记：空间音频（src/audio/）。
 });

@@ -5,6 +5,9 @@
   沿用 bench 面板的量级。
 -->
 <style>
+  @font-face { font-family: "noto-sans-sc"; src: url("../fonts/noto-sans-sc-regular.ttf"); font-weight: normal; }
+  @font-face { font-family: "noto-sans-sc"; src: url("../fonts/noto-sans-sc-bold.ttf"); font-weight: bold; }
+
   .music-root {
     flex-direction: column;
     width: 520px;
@@ -21,6 +24,7 @@
   }
 
   .music-line {
+    font-family: noto-sans-sc;
     color: #1c1d20;
     font-size: 30px;
     font-weight: 700;
@@ -45,6 +49,7 @@
   }
 
   .music-fallback {
+    font-family: noto-sans-sc;
     color: #6a675c;
     font-size: 12px;
     line-height: 16px;
