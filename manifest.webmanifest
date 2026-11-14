@@ -1,0 +1,17 @@
+{
+  "name": "The Goddess's Song · 女神之歌伊甸园",
+  "short_name": "女神之歌",
+  "description": "Lalita · A Lamp in the Darkness — 走进伊甸园，在莲池歌亭听一首《女神之歌》。",
+  "lang": "zh-Hans",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#17131f",
+  "theme_color": "#17131f",
+  "icons": [
+    { "src": "icons/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "icons/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,70 @@
+<!--
+  歌亭退出标志（歌亭改版 · 施工单第二节）：固定立于歌亭观众点
+  前方右手侧，只在身处歌亭（第 1 段）时显形。整块面板带
+  RayInteractable（场景节点），点按由 PavilionSystem 经 Pressed
+  订阅处理；注视停留 1 秒亦可触发（系统内自算，不经面板）。
+  文案用字全部取自既有 CJK 子集字符集（scripts/cjk-charset.txt），
+  勿擅自加字——加字须先重跑 scripts/build-cjk-font.md 的图集流程。
+-->
+<style>
+  @font-face { font-family: "noto-sans-sc"; src: url("../fonts/noto-sans-sc-regular.ttf"); font-weight: normal; }
+  @font-face { font-family: "noto-sans-sc"; src: url("../fonts/noto-sans-sc-bold.ttf"); font-weight: bold; }
+
+  .panel-root {
+    flex-direction: column;
+    width: 300px;
+  }
+
+  .panel-content {
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding-top: 18px;
+    padding-bottom: 18px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .heading {
+    font-family: noto-sans-sc;
+    color: #1c1d20;
+    font-size: 27px;
+    font-weight: 700;
+    line-height: 34px;
+    text-align: center;
+  }
+
+  .heading:dark {
+    color: #fafaf7;
+  }
+
+  .sub {
+    font-family: noto-sans-sc;
+    color: #3a3b40;
+    font-size: 16px;
+    line-height: 22px;
+    text-align: center;
+  }
+
+  .sub:dark {
+    color: #dddfe3;
+  }
+
+  .sub-en {
+    color: #6a675c;
+    font-size: 13px;
+    letter-spacing: 0.6px;
+    text-align: center;
+  }
+
+  .sub-en:dark {
+    color: #9d988a;
+  }
+</style>
+<Panel class="panel-root">
+  <div class="panel-content">
+    <div class="heading">离开歌亭</div>
+    <div class="sub">回到园子</div>
+    <div class="sub-en">EXIT · BACK TO THE GARDEN CENTRE</div>
+  </div>
+</Panel>
