@@ -26,6 +26,19 @@ import {
   registerSpaceLampDriver,
   SPACES,
 } from './spaces.js';
+import { getSongLampLevel } from '../audio/song-bus.js';
+
+/**
+ * 外部旅行请求桥（歌亭改版新增）：PavilionSystem 的新导航（注视
+ * 歌亭本体进入、退出标志回中央）经此处向 ArcSystem 申请换位，
+ * 换位仍走本系统既有的淡出/停驻/淡入状态机，只在无过渡进行时
+ * 受理。旧标记/手势路径不受影响。
+ */
+let travelRequestStage = -1;
+
+export function requestArcTravel(stage: number): void {
+  travelRequestStage = stage;
+}
 
 /**
  * 第四阶段 · 交互层：段落状态机 + 空间移动 + 手势 + 灯光呼吸。
@@ -68,6 +81,7 @@ import {
 
 /** 阶段编号：0 入口，1–5 与 SPACES.index 相同。 */
 const STAGE_ENTRANCE = 0;
+const STAGE_LOTUS = 1;
 const STAGE_STILLNESS = 5;
 
 /** 每段的观众点：[x, z, 朝向 yaw（度，0 = 看向 -Z）]；6、7、8 为弧外旁支。 */
@@ -556,6 +570,20 @@ export class ArcSystem extends createSystem({
   }
 
   update(delta: number, time: number): void {
+    // 外部旅行请求（歌亭新导航）：空闲时受理，复用既有换位状态机。
+    if (travelRequestStage >= 0 && this.transitionPhase === 0) {
+      const target = travelRequestStage;
+      travelRequestStage = -1;
+      if (target !== this.stage) {
+        this.pendingStage = target;
+        this.transitionPhase = 1;
+        this.transitionElapsed = 0;
+        this.gazeNodeId = undefined;
+        this.gazeSeconds = 0;
+        this.syncDirector();
+      }
+    }
+
     // 微光内纹极慢旋转（48 秒一圈），与呼吸同源、常开。
     if (this.orbCore != null) {
       this.orbCore.rotation.y +=
@@ -593,15 +621,22 @@ export class ArcSystem extends createSystem({
       }
     }
 
-    // 当前段落灯呼吸：正弦增益 0.85–1.15，16 秒一周期（测试曲线）。
+    // 当前段落灯呼吸：第 1 段（歌亭）优先用真实音频电平（SongSystem
+    // 经 song-bus 发布），无歌声时回落正弦增益 0.85–1.15、16 秒
+    // 一周期（原测试曲线）；其余段落照旧正弦。
     if (this.transitionPhase === 0) {
       const breath =
         1 +
         0.15 *
           Math.sin((time / BREATH_PERIOD_SECONDS) * Math.PI * 2);
+      let level = breath;
+      if (this.stage === STAGE_LOTUS) {
+        const audioLevel = getSongLampLevel();
+        if (audioLevel != null) level = audioLevel;
+      }
       applySpaceLampAudioLevel(
         this.stage === STAGE_ENTRANCE ? 0 : this.stage,
-        breath,
+        level,
       );
     }
 

@@ -48,6 +48,11 @@ export const SPACES: readonly SpaceDefinition[] = [
     status: 'built',
     sceneAssetIds: ['lotus-pavilion', 'lotus-pond'],
     lampLightNodeId: 'lotus-pavilion-lamp-light',
+    // 歌亭改版（2026-11-14）：本亭即全园正门歌亭——《女神之歌》
+    // VR 改编版在此发声（登记见 src/audio/README.md），进亭自动
+    // 起播、本段灯改由真实音频电平驱动；新导航（注视亭身闪光
+    // 进入、退出标志回中央）在 PavilionSystem。亭身视觉已按
+    // 主视觉定版改白金粉顶 + 轻纱垂幔 + 琴与空座。
   },
   {
     index: 2,

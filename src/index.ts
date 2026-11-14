@@ -9,6 +9,8 @@ import { World } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
 import { PanelSystem } from './panel.js';
 import { ArcSystem } from './spaces/arc-system.js';
+import { PavilionSystem } from './spaces/pavilion-system.js';
+import { SongSystem } from './audio/song-system.js';
 import { MeditationSystem } from './spaces/meditation-system.js';
 import { BenchNotesSystem } from './spaces/bench-notes-system.js';
 import { ComedyCatalogSystem } from './spaces/comedy-catalog-system.js';
@@ -37,5 +39,26 @@ World.create(
   // CjkFontSystem（中文字体注册）：把预生成的 Noto Sans SC 子集
   // MSDF 图集注入各面板根元素，修复中文白方块（见 cjk-font.ts）。
   world.registerSystem(CjkFontSystem);
-  // 后续系统在此登记：空间音频（src/audio/）。
+  // PavilionSystem（歌亭改版，2026-11-14）：歌亭单线新导航（注视
+  // 亭身闪光进入、退出标志回中央）、轻纱/莲池活画、B 案画像开关。
+  world.registerSystem(PavilionSystem);
+  // SongSystem（src/audio/）：《女神之歌》VR 改编版播放与音频
+  // 电平发布（歌亭段落灯的呼吸驱动源）。
+  world.registerSystem(SongSystem);
+
+  // PWA 装机自动进入（iwsdk-pwa-packaging 步骤 1）：从应用库图标
+  // 启动的已安装 PWA 没有 2D 页面可点 Enter XR，图标点击即用户
+  // 激活，由应用自己花掉它。getDigitalGoodsService 只存在于
+  // 已安装环境，普通浏览器标签页永不触发、仍走欢迎板按钮。
+  const nav = navigator as Navigator & {
+    xr?: { isSessionSupported?: (mode: string) => Promise<boolean> };
+  };
+  if ('getDigitalGoodsService' in window && nav.xr?.isSessionSupported) {
+    nav.xr
+      .isSessionSupported('immersive-vr')
+      .then((supported) => {
+        if (supported) world.launchXR();
+      })
+      .catch(() => {});
+  }
 });

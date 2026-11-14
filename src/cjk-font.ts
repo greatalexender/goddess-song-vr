@@ -37,6 +37,7 @@ const PANEL_IDS = [
   'serpent-panel',
   'starlight-panel',
   'interaction-hint-panel',
+  'pavilion-exit-panel',
   'music-panel',
   'bench-notes-panel',
   'comedy-screen-panel',

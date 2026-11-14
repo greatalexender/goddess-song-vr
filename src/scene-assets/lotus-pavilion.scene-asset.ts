@@ -13,40 +13,44 @@ import {
 import { createGoddessLamp } from './garden.scene-asset.js';
 
 /**
- * 莲花亭（空间 1 · 呼唤）与其前的莲池，全部程序化低模生成。
+ * 歌亭（空间 1 · 呼唤）与其前的莲池，全部程序化低模生成。
  *
- * 亭：八边石台 + 六根细柱 + 红色锥顶（金色压边环与顶珠），亭中一盏
- * 派生自 goddess-lamp 的灯（亮度由 lampIntensity 参数预留给空间音频
- * 钩子，静态阶段为点亮态；真正的照亮由场景节点上的 PointLight 提供）。
- * 池：石圈 + 一片「涟漪水面」——用 Lathe 剖面的正弦起伏做出顶点波纹，
- * 靠晨光方向光打出法线明暗，不用贴图、不用逐帧动画，是本阶段最便宜的
- * 水面方案。水面之上薄雾两层（极低透明度的暖白色薄盘），与方向光
- * 一起近似「暖色雾」——IWSDK 场景格式没有 Fog 组件，只能如此近似。
+ * 2026-11-14 歌亭改版（施工单定版，主视觉基准：
+ * references/song-pavilion-lotus-pond-key-visual-2026-11-13.jpg）：
+ * 亭身改白金大理石、红锥顶改粉色穹顶（金环压边、莲苞顶珠），
+ * 柱间垂**轻纱**（组名 pavilion-curtains，逐幅 pavilion-curtain，
+ * 由 PavilionSystem 做摆动动画——本景签名动作「轻纱迎风」），
+ * 亭中一张空座 + 一把维纳琴静置（pavilion-seat 组，不添人物），
+ * 中央仍是派生自 goddess-lamp 的段落灯（场景节点 PointLight 照明）。
  *
- * 莲花 6 朵，位置/朝向/大小全部写死（资产清单在双 realm 求值，必须
- * 确定性，禁用随机数）：五瓣低模锥瓣 + 发光花心 + 一片莲叶。
+ * 池：石圈 + 涟漪水面（Lathe 正弦剖面，顶点波纹、零贴图）。活画
+ * 挂点（PavilionSystem 逐帧驱动，只动光与水）：水面 pond-water、
+ * 薄雾 pond-mist-0/1、斜射光束 pond-sunbeam、莲心微光。
+ *
+ * 莲花 6 朵，位置/朝向/大小全部写死（资产清单在双 realm 求值，
+ * 必须确定性，禁用随机数）：五瓣低模锥瓣 + 发光花心 + 一片莲叶。
  */
 
-const stoneMaterial = createSceneMaterial({
-  id: 'lotus-pavilion-stone',
+const marbleMaterial = createSceneMaterial({
+  id: 'lotus-pavilion-marble',
   model: 'standard',
-  baseColor: '#8A8378',
-  roughness: 0.95,
+  baseColor: '#EFE7D6',
+  roughness: 0.55,
 });
 
 const columnMaterial = createSceneMaterial({
   id: 'lotus-pavilion-column',
   model: 'standard',
-  baseColor: '#6E2A22',
-  roughness: 0.7,
+  baseColor: '#F5F0E2',
+  roughness: 0.5,
 });
 
-const roofMaterial = createSceneMaterial({
-  id: 'lotus-pavilion-roof',
+const domeMaterial = createSceneMaterial({
+  id: 'lotus-pavilion-dome',
   model: 'standard',
-  baseColor: '#9C3427',
-  roughness: 0.55,
-  metalness: 0.2,
+  baseColor: '#E9A9BE',
+  roughness: 0.4,
+  metalness: 0.15,
 });
 
 const goldMaterial = createSceneMaterial({
@@ -55,6 +59,29 @@ const goldMaterial = createSceneMaterial({
   baseColor: '#C9A227',
   roughness: 0.35,
   metalness: 0.85,
+});
+
+/** 轻纱：无光照半透明薄片，摆动时不产生高光闪烁。 */
+const curtainMaterial = createSceneMaterial({
+  id: 'lotus-pavilion-curtain',
+  model: 'basic',
+  baseColor: '#FFF6E8',
+  opacity: 0.4,
+  side: 'double',
+});
+
+const cushionMaterial = createSceneMaterial({
+  id: 'lotus-pavilion-cushion',
+  model: 'standard',
+  baseColor: '#D98CA6',
+  roughness: 0.8,
+});
+
+const veenaWoodMaterial = createSceneMaterial({
+  id: 'lotus-pavilion-veena-wood',
+  model: 'standard',
+  baseColor: '#6B4226',
+  roughness: 0.55,
 });
 
 export function createLotusPavilion(
@@ -72,7 +99,7 @@ export function createLotusPavilion(
         segments: 8,
       },
     },
-    stoneMaterial,
+    marbleMaterial,
   );
   plinth.position.y = 0.03;
   pavilion.add(plinth);
@@ -87,53 +114,199 @@ export function createLotusPavilion(
         segments: 8,
       },
     },
-    stoneMaterial,
+    marbleMaterial,
   );
   platform.position.y = 0.13;
   pavilion.add(platform);
 
+  const platformTrim = createScenePrimitiveObject(
+    {
+      geometry: { type: 'torus', radius: 2.34, tube: 0.022, radialSegments: 8, tubularSegments: 40 },
+    },
+    goldMaterial,
+  );
+  platformTrim.rotation.x = Math.PI / 2;
+  platformTrim.position.y = 0.2;
+  pavilion.add(platformTrim);
+
   const floorY = 0.2;
   const columnHeight = 2.1;
+  const columnRadius = 1.85;
   for (let i = 0; i < 6; i++) {
     const angle = (i / 6) * Math.PI * 2;
     const column = createScenePrimitiveObject(
       {
-        geometry: { type: 'cylinder', radius: 0.05, height: columnHeight, segments: 8 },
+        geometry: { type: 'cylinder', radius: 0.075, height: columnHeight, segments: 10 },
       },
       columnMaterial,
     );
     column.position.set(
-      Math.cos(angle) * 1.85,
+      Math.cos(angle) * columnRadius,
       floorY + columnHeight / 2,
-      Math.sin(angle) * 1.85,
+      Math.sin(angle) * columnRadius,
     );
     pavilion.add(column);
+    const capital = createScenePrimitiveObject(
+      {
+        geometry: { type: 'cylinder', radius: 0.12, height: 0.05, segments: 10 },
+      },
+      goldMaterial,
+    );
+    capital.position.set(
+      Math.cos(angle) * columnRadius,
+      floorY + columnHeight - 0.02,
+      Math.sin(angle) * columnRadius,
+    );
+    pavilion.add(capital);
   }
 
   const roofBaseY = floorY + columnHeight;
-  const roof = createScenePrimitiveObject(
-    { geometry: { type: 'cone', radius: 2.75, height: 1.15, segments: 8 } },
-    roofMaterial,
-  );
-  roof.position.y = roofBaseY + 0.575;
-  pavilion.add(roof);
 
-  const trim = createScenePrimitiveObject(
+  // 檐口环：白石圈梁，穹顶坐落其上。
+  const entablature = createScenePrimitiveObject(
     {
-      geometry: { type: 'torus', radius: 2.42, tube: 0.04, radialSegments: 8, tubularSegments: 32 },
+      geometry: { type: 'cylinder', radius: 2.38, height: 0.12, segments: 24 },
+    },
+    marbleMaterial,
+  );
+  entablature.position.y = roofBaseY + 0.06;
+  pavilion.add(entablature);
+
+  // 粉色穹顶：球体压扁，下半沉入檐口环，只取上半的圆润剪影。
+  const dome = createScenePrimitiveObject(
+    { geometry: { type: 'sphere', radius: 2.15, segments: 24 } },
+    domeMaterial,
+  );
+  dome.scale.set(1, 0.62, 1);
+  dome.position.y = roofBaseY + 0.1;
+  pavilion.add(dome);
+
+  const domeBaseRing = createScenePrimitiveObject(
+    {
+      geometry: { type: 'torus', radius: 2.14, tube: 0.03, radialSegments: 8, tubularSegments: 40 },
     },
     goldMaterial,
   );
-  trim.rotation.x = Math.PI / 2;
-  trim.position.y = roofBaseY + 0.06;
-  pavilion.add(trim);
+  domeBaseRing.rotation.x = Math.PI / 2;
+  domeBaseRing.position.y = roofBaseY + 0.16;
+  pavilion.add(domeBaseRing);
 
-  const finial = createScenePrimitiveObject(
-    { geometry: { type: 'sphere', radius: 0.09, segments: 12 } },
+  const domeMidRing = createScenePrimitiveObject(
+    {
+      geometry: { type: 'torus', radius: 1.52, tube: 0.022, radialSegments: 8, tubularSegments: 36 },
+    },
     goldMaterial,
   );
-  finial.position.y = roofBaseY + 1.15 + 0.05;
-  pavilion.add(finial);
+  domeMidRing.rotation.x = Math.PI / 2;
+  domeMidRing.position.y = roofBaseY + 0.78;
+  pavilion.add(domeMidRing);
+
+  // 顶珠：金 stem + 粉色莲苞（主视觉题眼）。
+  const finialStem = createScenePrimitiveObject(
+    {
+      geometry: { type: 'cylinder', radius: 0.03, height: 0.14, segments: 8 },
+    },
+    goldMaterial,
+  );
+  finialStem.position.y = roofBaseY + 1.47;
+  pavilion.add(finialStem);
+  const finialBud = createScenePrimitiveObject(
+    { geometry: { type: 'cone', radius: 0.1, height: 0.26, segments: 10 } },
+    domeMaterial,
+  );
+  finialBud.position.y = roofBaseY + 1.66;
+  pavilion.add(finialBud);
+
+  // 轻纱垂幔：六幅，挂在柱间檐下；支点在上沿，摆动绕支点（系统驱动）。
+  const curtains = new Group();
+  curtains.name = 'pavilion-curtains';
+  for (let i = 0; i < 6; i++) {
+    const angle = ((i + 0.5) / 6) * Math.PI * 2;
+    const holder = new Group();
+    holder.name = 'pavilion-curtain';
+    holder.position.set(
+      Math.cos(angle) * 1.8,
+      roofBaseY + 0.02,
+      Math.sin(angle) * 1.8,
+    );
+    holder.rotation.y = -angle + Math.PI / 2;
+    const drape = createScenePrimitiveObject(
+      {
+        geometry: { type: 'box', size: [1.0, 1.5, 0.015] },
+      },
+      curtainMaterial,
+    );
+    drape.position.y = -0.78;
+    holder.add(drape);
+    curtains.add(holder);
+  }
+  pavilion.add(curtains);
+
+  // 空座 + 维纳琴（静置）：座在灯后左侧，琴斜倚座上——只留剪影，
+  // 「琴声仿佛就要响起」的将启未启，不添人物。
+  const seat = new Group();
+  seat.name = 'pavilion-seat';
+  seat.position.set(-0.42, floorY, 0.72);
+  seat.rotation.y = 0.5;
+  const daybed = createScenePrimitiveObject(
+    {
+      geometry: { type: 'box', size: [1.5, 0.22, 0.62] },
+    },
+    marbleMaterial,
+  );
+  daybed.position.y = 0.11;
+  seat.add(daybed);
+  const cushion = createScenePrimitiveObject(
+    {
+      geometry: { type: 'box', size: [1.42, 0.1, 0.54] },
+    },
+    cushionMaterial,
+  );
+  cushion.position.y = 0.27;
+  seat.add(cushion);
+  const backrest = createScenePrimitiveObject(
+    {
+      geometry: { type: 'box', size: [1.42, 0.34, 0.09] },
+    },
+    cushionMaterial,
+  );
+  backrest.position.set(0, 0.42, -0.28);
+  backrest.rotation.x = -0.18;
+  seat.add(backrest);
+
+  const veena = new Group();
+  veena.position.set(0.05, 0.36, 0.02);
+  veena.rotation.set(0, 0.15, 0.42);
+  const gourdMain = createScenePrimitiveObject(
+    { geometry: { type: 'sphere', radius: 0.17, segments: 14 } },
+    veenaWoodMaterial,
+  );
+  gourdMain.position.x = -0.34;
+  veena.add(gourdMain);
+  const gourdSmall = createScenePrimitiveObject(
+    { geometry: { type: 'sphere', radius: 0.1, segments: 12 } },
+    veenaWoodMaterial,
+  );
+  gourdSmall.position.set(0.38, 0.09, 0);
+  veena.add(gourdSmall);
+  const neck = createScenePrimitiveObject(
+    {
+      geometry: { type: 'box', size: [0.78, 0.045, 0.07] },
+    },
+    veenaWoodMaterial,
+  );
+  neck.position.x = 0.05;
+  veena.add(neck);
+  const pegbox = createScenePrimitiveObject(
+    {
+      geometry: { type: 'box', size: [0.12, 0.09, 0.06] },
+    },
+    goldMaterial,
+  );
+  pegbox.position.set(0.48, 0.03, 0);
+  veena.add(pegbox);
+  seat.add(veena);
+  pavilion.add(seat);
 
   const lamp = createGoddessLamp({
     bulbEmissiveIntensity: options.lampIntensity ?? 3,
@@ -201,6 +374,15 @@ const mistMaterialFar = createSceneMaterial({
   side: 'double',
 });
 
+/** 晨光光束：极低透明度的暖色斜面，只作光感，不作实体。 */
+const sunbeamMaterial = createSceneMaterial({
+  id: 'lotus-pond-sunbeam',
+  model: 'basic',
+  baseColor: '#FFDF9E',
+  opacity: 0.05,
+  side: 'double',
+});
+
 /** 一朵莲花：五片外张的锥瓣 + 发光花心，旁附一片莲叶。原点在水面落点。 */
 function createLotus(scale: number, yawDeg: number): Group {
   const flower = new Group();
@@ -258,7 +440,7 @@ export function createLotusPond(): Group {
   rim.position.y = 0.03;
   pond.add(rim);
 
-  // 涟漪水面：Lathe 剖面沿半径作正弦起伏，顶点波纹 + 真实法线，零贴图零动画。
+  // 涟漪水面：Lathe 剖面沿半径作正弦起伏，顶点波纹 + 真实法线，零贴图。
   const profile: Array<[number, number]> = [];
   const profileSteps = 9;
   for (let i = 0; i <= profileSteps; i++) {
@@ -270,6 +452,7 @@ export function createLotusPond(): Group {
     { geometry: { type: 'lathe', profile, segments: 36 } },
     waterMaterial,
   );
+  water.name = 'pond-water';
   pond.add(water);
 
   for (const [radius, angleDeg, scale] of LOTUS_PLACEMENTS) {
@@ -284,14 +467,27 @@ export function createLotusPond(): Group {
     { radius: 3.3, y: 0.3, material: mistMaterialNear },
     { radius: 4.1, y: 0.62, material: mistMaterialFar },
   ] as const;
-  for (const layer of mistLayers) {
+  mistLayers.forEach((layer, index) => {
     const mist = createScenePrimitiveObject(
       { geometry: { type: 'cylinder', radius: layer.radius, height: 0.01, segments: 24 } },
       layer.material,
     );
     mist.position.y = layer.y;
+    mist.name = `pond-mist-${index}`;
     pond.add(mist);
-  }
+  });
+
+  // 晨光斜束：自左上（晨光方向光一侧）斜落池面的一片暖光。
+  const sunbeam = createScenePrimitiveObject(
+    {
+      geometry: { type: 'box', size: [4.4, 0.015, 1.25] },
+    },
+    sunbeamMaterial,
+  );
+  sunbeam.name = 'pond-sunbeam';
+  sunbeam.position.set(0.5, 1.05, -0.5);
+  sunbeam.rotation.set(0.12, 0.3, -0.42);
+  pond.add(sunbeam);
 
   return pond;
 }

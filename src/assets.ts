@@ -156,6 +156,13 @@ export default defineAssets({
     type: AssetType.UIKitML,
     name: 'Interaction Hint Panel',
   },
+  // 歌亭退出标志（歌亭改版，2026-11-14）：立于歌亭观众点前方，
+  // 只在第 1 段显形；行为在 PavilionSystem（点按/注视 → 回中央）。
+  'pavilion-exit-panel': {
+    url: publicAssetUrl('ui/pavilion-exit.uikitml'),
+    type: AssetType.UIKitML,
+    name: 'Pavilion Exit Panel',
+  },
   // 长椅留言层（数字城城门口留言版在园中的落点）：椅面之下的
   // 微光标记（挂在 goddess-bench 节点下作子节点）与留言面板。
   // 数据层见 src/spaces/bench-notes.ts，访客侧系统见
