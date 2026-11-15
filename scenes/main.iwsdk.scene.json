@@ -962,16 +962,16 @@
       "name": "Pavilion Exit Panel",
       "transform": {
         "position": [
-          -4.98,
-          1.5,
-          -5.19
+          -4.69,
+          0.5,
+          -7.84
         ],
         "rotationDeg": [
           0,
-          12,
+          1.7,
           0
         ],
-        "scale": 0.6
+        "scale": 0.45
       }
     }
   ],
