@@ -60,11 +60,45 @@
   .sub-en:dark {
     color: #9d988a;
   }
+
+  .status-box {
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    margin-top: 10px;
+  }
+
+  .status-zh {
+    font-family: noto-sans-sc;
+    color: #8a6d00;
+    font-size: 16px;
+    line-height: 22px;
+    text-align: center;
+  }
+
+  .status-zh:dark {
+    color: #ffd76a;
+  }
+
+  .status-en {
+    color: #6a675c;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  .status-en:dark {
+    color: #c9b458;
+  }
 </style>
 <Panel class="panel-root">
   <div class="panel-content">
     <div class="heading">离开歌亭</div>
     <div class="sub">回到园子</div>
     <div class="sub-en">EXIT · BACK TO THE GARDEN CENTRE</div>
+    <div id="song-status-box" class="status-box" style="display: none">
+      <div id="song-status-zh" class="status-zh"></div>
+      <div id="song-status-en" class="status-en"></div>
+    </div>
   </div>
 </Panel>
