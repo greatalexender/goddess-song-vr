@@ -26,5 +26,10 @@ export const SONG_CUT_LABEL = 'A';
 /** 文件内起播偏移（秒）：文件已按切入点预剪，默认从头播。 */
 export const SONG_PLAYBACK_OFFSET_SECONDS = 0;
 
-/** 播完是否循环：听完整首即止，不循环。 */
-export const SONG_LOOP = false;
+/**
+ * 播完是否循环：循环永续（2026-11-14 第二批改版，Solomon 亲定）——
+ * 客人在亭内多久就唱多久、无播完断点。接缝为文件级直接循环：
+ * 文件头有 0.6 s 淡入、母带尾部自然衰减，接缝听感平滑度以真机
+ * 复测为准；若复测觉接缝明显，再做双源交叉淡化版。
+ */
+export const SONG_LOOP = true;

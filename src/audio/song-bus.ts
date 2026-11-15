@@ -10,11 +10,21 @@
 export interface SongControls {
   play(): void;
   stop(): void;
+  /** 点火：在真实用户手势内创建/resume AudioContext 并预热解码。 */
+  prime(): void;
   isPlaying(): boolean;
 }
 
+/**
+ * 播放状态（供亭内面板显示加载/失败提示，不许静默失败）：
+ * idle 未点火；loading 已点火或想播但未出声（加载/解码/待 resume）；
+ * ready 已解码待命；playing 正在出声；error 重试耗尽仍未出声。
+ */
+export type SongStatus = 'idle' | 'loading' | 'ready' | 'playing' | 'error';
+
 let controls: SongControls | undefined;
 let lampLevel: number | null = null;
+let songStatus: SongStatus = 'idle';
 
 export function registerSongControls(
   next: SongControls,
@@ -23,6 +33,11 @@ export function registerSongControls(
   return () => {
     if (controls === next) controls = undefined;
   };
+}
+
+/** 点火请求：Enter XR 点击、页面首次 pointerdown、XR select 兜底均经此处。 */
+export function primeSongAudio(): void {
+  controls?.prime();
 }
 
 export function requestSongPlay(): void {
@@ -45,4 +60,13 @@ export function setSongLampLevel(level: number | null): void {
 /** ArcSystem 读取：null 表示当前无真实音频电平可用。 */
 export function getSongLampLevel(): number | null {
   return lampLevel;
+}
+
+/** SongSystem 在状态变化时写入；PavilionSystem 读它驱动亭内提示行。 */
+export function setSongStatus(status: SongStatus): void {
+  songStatus = status;
+}
+
+export function getSongStatus(): SongStatus {
+  return songStatus;
 }

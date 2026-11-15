@@ -8,6 +8,7 @@
 import { World } from '@iwsdk/core';
 import projectOptions from 'virtual:iwsdk-project';
 import { PanelSystem } from './panel.js';
+import { primeSongAudio } from './audio/song-bus.js';
 import { ArcSystem } from './spaces/arc-system.js';
 import { PavilionSystem } from './spaces/pavilion-system.js';
 import { SongSystem } from './audio/song-system.js';
@@ -57,7 +58,11 @@ World.create(
     nav.xr
       .isSessionSupported('immersive-vr')
       .then((supported) => {
-        if (supported) world.launchXR();
+        if (supported) {
+          // 图标点开即用户激活：顺手完成双保险第一重点火。
+          primeSongAudio();
+          world.launchXR();
+        }
       })
       .catch(() => {});
   }

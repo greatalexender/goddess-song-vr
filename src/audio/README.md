@@ -17,6 +17,14 @@
 - 配置单一来源：`src/audio/song-config.ts`（路径、切入点、起播偏移、循环）。
 - 播放：`SongSystem`（进歌亭起播、离开停播；AnalyserNode 电平 →
   `song-bus.ts` → ArcSystem 驱动歌亭段落灯呼吸）。
+- 第二批改版（2026-11-14）：**循环永续**（`SONG_LOOP = true`，文件级
+  直接循环——文件头 0.6 s 淡入、尾部自然衰减，接缝以真机复测为准）；
+  **双保险起播**——第一重：Enter XR 真实点击内经 `primeSongAudio()`
+  点火（建/resume AudioContext + 预热解码，静音待命）；第二重：进亭
+  自动起播（独立路径）；其下加重试看门狗状态机（fetch/解码退避重试、
+  context 持续 resume、源意外结束重启），状态经 song-bus 发布供亭内
+  面板亮加载/失败提示，不许静默无声。背景：第一批真机间歇无声
+  （一次性调用成败定终身 + 纯注视进入时 context 永久 suspended）。
 - 锚定：歌声锚在歌亭（第 1 段空间），非第 1 段不发声；本版为
   非定位声（观众点距亭心约 4 m 的坐姿聆听，定位收益低），
   positional 化留待后续阶段。

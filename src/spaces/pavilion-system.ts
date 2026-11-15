@@ -21,7 +21,13 @@ import {
 import { ArcDirector } from './arc-components.js';
 import { PavilionExitSign } from './pavilion-components.js';
 import { requestArcTravel } from './arc-system.js';
-import { requestSongPlay, requestSongStop } from '../audio/song-bus.js';
+import {
+  getSongLampLevel,
+  getSongStatus,
+  requestSongPlay,
+  requestSongStop,
+  type SongStatus,
+} from '../audio/song-bus.js';
 
 /**
  * 歌亭改版（2026-11-14，施工单定版）——只管歌亭这一条线：
@@ -42,12 +48,15 @@ import { requestSongPlay, requestSongStop } from '../audio/song-bus.js';
  * 活画（只动光与水，守「有点」分寸）：轻纱摆动（亭的签名
  * 动作）、水面微光/微漾、薄雾缓流、晨光束轻移、莲心闪点。
  *
- * B 案（画像模式）：PAVILION_PORTRAIT_MODE 打开时，第 1 段在
- * 观众眼前展开三界画像 v2 作听歌主视觉；默认关（A 案实景
- * 环绕为本轮主案），真机验 A 案包围感不达标时改此开关重部署。
+ * B 案（画像模式）：第 1 段在观众眼前大幅展开三界画像作听歌
+ * 主视觉。第二批改版（2026-11-14）启用为送审版默认：语言规则
+ * ——界面中文用中文 v2 像、英文用英文像，送审构建默认英文
+ * （按 navigator.language 判定，非中文一律英文像）。画像轻
+ * 动态：亮度随歌曲真实电平呼吸（无电平时走慢速正弦），其余
+ * 静态（光轮缓转需分层素材，留待后续）。
  */
 
-export const PAVILION_PORTRAIT_MODE = false;
+export const PAVILION_PORTRAIT_MODE = true;
 
 const STAGE_ENTRANCE = 0;
 const STAGE_LOTUS = 1;
@@ -95,6 +104,10 @@ export class PavilionSystem extends createSystem({
   private exitClickWired = false;
 
   private portrait: Mesh | undefined;
+  private portraitMaterial: MeshBasicMaterial | undefined;
+
+  private songStatusWired = false;
+  private songStatusShown: SongStatus | undefined;
 
   private enterDwell = 0;
   private exitDwell = 0;
@@ -228,16 +241,53 @@ export class PavilionSystem extends createSystem({
     this.exitClickWired = true;
   }
 
+  /**
+   * 亭内歌曲状态提示行（退出标志面板底部，第二批改版）：歌曲
+   * 未出声绝不静默——加载中亮「歌正在加载」，重试耗尽亮
+   * 「若听不到歌，请捏合或按一下」；出声后自动隐去。面板文档
+   * 异步装配，update 里重试接线；状态变化时才写面板属性。
+   */
+  private updateSongStatusLine(): void {
+    if (this.stage !== STAGE_LOTUS) return;
+    const status = getSongStatus();
+    if (status === this.songStatusShown && this.songStatusWired) return;
+    const panel =
+      this.world.getSceneObject<UIKitMLAsset>('pavilion-exit-panel');
+    const box = panel?.getElementById('song-status-box');
+    const zh = panel?.getElementById('song-status-zh');
+    const en = panel?.getElementById('song-status-en');
+    if (panel == null || box == null || zh == null || en == null) return;
+    this.songStatusWired = true;
+    if (status === 'loading') {
+      zh.setProperties({ text: '歌正在加载' });
+      en.setProperties({ text: 'THE SONG IS LOADING' });
+      box.setProperties({ display: 'flex' });
+    } else if (status === 'error') {
+      zh.setProperties({ text: '若听不到歌，请捏合或按一下' });
+      en.setProperties({
+        text: 'NO SONG? PINCH, OR PRESS THE TRIGGER, AND WAIT',
+      });
+      box.setProperties({ display: 'flex' });
+    } else {
+      box.setProperties({ display: 'none' });
+    }
+    this.songStatusShown = status;
+  }
+
   private setupPortrait(): void {
+    // 语言规则：中文界面 → 中文 v2 像；其余（含送审默认）→ 英文像。
+    const isZh = (navigator.language ?? '').toLowerCase().startsWith('zh');
+    const file = isZh ? 'goddess-portrait-v2.jpg' : 'goddess-portrait-en.jpg';
     const texture = new TextureLoader().load(
-      `${import.meta.env.BASE_URL}images/goddess-portrait-v2.jpg`,
+      `${import.meta.env.BASE_URL}images/${file}`,
     );
+    this.portraitMaterial = new MeshBasicMaterial({ map: texture });
     const mesh = new Mesh(
-      new PlaneGeometry(1.4, 2.1),
-      new MeshBasicMaterial({ map: texture }),
+      new PlaneGeometry(1.8, 2.7),
+      this.portraitMaterial,
     );
     // 观众点 [-4.55, -3.15] 朝向 36° 前方 2.6 m，画像正对观众。
-    mesh.position.set(-6.08, 1.78, -5.25);
+    mesh.position.set(-6.08, 1.85, -5.25);
     mesh.lookAt(-4.55, 1.6, -3.15);
     mesh.visible = false;
     this.portrait = mesh;
@@ -304,6 +354,7 @@ export class PavilionSystem extends createSystem({
 
   update(delta: number, time: number): void {
     this.wireExitClick();
+    this.updateSongStatusLine();
     const director = this.readDirector();
     if (director != null) {
       if (!this.stageKnown || director.stage !== this.stage) {
@@ -419,6 +470,16 @@ export class PavilionSystem extends createSystem({
     if (this.heartMaterial != null) {
       this.heartMaterial.emissiveIntensity =
         2 + Math.sin(time * 1.3) * 0.3 + Math.sin(time * 3.7) * 0.18;
+    }
+    // 画像轻动态：亮度随歌曲真实电平呼吸（增益 1 = 基准，
+    // 映射到 0.86–1.14 的颜色倍乘）；无电平时慢速正弦兜底。
+    if (this.portraitMaterial != null && this.portrait?.visible) {
+      const level = getSongLampLevel();
+      const intensity =
+        level != null
+          ? Math.min(1.14, Math.max(0.86, 0.72 + level * 0.28))
+          : 0.95 + 0.05 * Math.sin(time * 0.9);
+      this.portraitMaterial.color.setScalar(intensity);
     }
   }
 }
