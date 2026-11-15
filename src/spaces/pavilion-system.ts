@@ -54,6 +54,19 @@ import {
  * （按 navigator.language 判定，非中文一律英文像）。画像轻
  * 动态：亮度随歌曲真实电平呼吸（无电平时走慢速正弦），其余
  * 静态（光轮缓转需分层素材，留待后续）。
+ *
+ * 第三批改版（2026-11-14 真机复测后，Solomon 亲定）：「进入
+ * 亭子后不要看到亭子，就是背景莲花池像和中间正中的女神像」。
+ * 第二批的画像面立在亭体内部（距亭轴 1.55 m，落在柱环/纱环
+ * 之内、与穹顶相交），真机上被轻纱与亭体遮挡（Vision Pro 只
+ * 见下半截、Quest 全不可见）。本批改法：第 1 段隐藏亭体外壳
+ * （柱、穹顶、轻纱、座、琴、基座等全部网格子树，唯段落灯组
+ * 保留——灯光呼吸是背景的一部分），画像移到观众正前方视轴
+ * 正中（2.8 m、1.6×2.4 m、定心眼高 1.5 m），其后 6.2 m 处立
+ * 大幅莲池背景像（Solomon 亲发晨光莲池图，图中亭心经横向
+ * 偏移对正视轴、由画像覆住）；池面薄雾与晨光斜束在第 1 段
+ * 一并隐藏（避免透明薄片切过画像/背景面），水面与莲保留。
+ * 园外（第 0 段）亭体外观与注视进入完全不变。
  */
 
 export const PAVILION_PORTRAIT_MODE = true;
@@ -63,6 +76,34 @@ const STAGE_LOTUS = 1;
 
 /** 歌亭本体的注视靶心（亭心 + 眼高），世界坐标。 */
 const PAVILION_TARGET = new Vector3(-7, 1.6, -6.5);
+
+/**
+ * 第 1 段观众点（与 ArcSystem 的 STAGE_VIEWS[1] 一致）与视轴：
+ * 自观众点指向亭心。画像/背景像的摆位全部由这条轴推导。
+ */
+const AUDIENCE_X = -4.55;
+const AUDIENCE_Z = -3.15;
+const VIEW_AXIS = new Vector3(
+  PAVILION_TARGET.x - AUDIENCE_X,
+  0,
+  PAVILION_TARGET.z - AUDIENCE_Z,
+).normalize();
+/** 观众右手方向（视轴顺时针 90°），用于背景像的横向对位。 */
+const VIEW_RIGHT = new Vector3(-VIEW_AXIS.z, 0, VIEW_AXIS.x);
+
+const PORTRAIT_DISTANCE = 2.8;
+const PORTRAIT_WIDTH = 1.6;
+const PORTRAIT_HEIGHT = 2.4;
+const PORTRAIT_CENTER_Y = 1.5;
+const BACKDROP_DISTANCE = 6.2;
+const BACKDROP_WIDTH = 8.0;
+const BACKDROP_HEIGHT = 4.5;
+const BACKDROP_CENTER_Y = 1.7;
+/**
+ * 背景图中的亭子位于画面宽度约 58% 处：整面左移 0.6 m，让图中
+ * 亭心落到视轴上、正好被居中画像覆住。
+ */
+const BACKDROP_AXIS_SHIFT = 0.6;
 const ENTER_GAZE_DWELL_SECONDS = 1.1;
 const ENTER_MAX_ANGLE_COS = Math.cos((15 * Math.PI) / 180);
 const EXIT_GAZE_DWELL_SECONDS = 1.0;
@@ -81,6 +122,35 @@ interface MistBinding {
   material: MeshBasicMaterial;
   baseX: number;
   baseOpacity: number;
+}
+
+/** 子树里是否有网格（init 期一次性分拣用）。 */
+function subtreeHasMesh(root: Object3D): boolean {
+  let found = false;
+  root.traverse((child) => {
+    if (child instanceof Mesh) found = true;
+  });
+  return found;
+}
+
+/** 子树里是否有段落灯灯球（按 emissive 色认领，与闪光排除同口径）。 */
+function subtreeHasLampBulb(root: Object3D): boolean {
+  let found = false;
+  root.traverse((child) => {
+    if (found || !(child instanceof Mesh)) return;
+    const materials = Array.isArray(child.material)
+      ? child.material
+      : [child.material];
+    for (const material of materials) {
+      if (
+        material instanceof MeshStandardMaterial &&
+        material.emissive.getHex() === LAMP_BULB_EMISSIVE
+      ) {
+        found = true;
+      }
+    }
+  });
+  return found;
 }
 
 export class PavilionSystem extends createSystem({
@@ -105,6 +175,11 @@ export class PavilionSystem extends createSystem({
 
   private portrait: Mesh | undefined;
   private portraitMaterial: MeshBasicMaterial | undefined;
+  private backdrop: Mesh | undefined;
+
+  /** 第 1 段要隐藏的亭体外壳子树（段落灯组除外）与池面帷幕物。 */
+  private shellTargets: Object3D[] = [];
+  private veilTargets: Object3D[] = [];
 
   private songStatusWired = false;
   private songStatusShown: SongStatus | undefined;
@@ -159,6 +234,19 @@ export class PavilionSystem extends createSystem({
     if (curtains != null) {
       this.curtainHolders = curtains.children.slice();
     }
+    // 亭内模式（第 1 段）要隐藏的外壳：以亭资产根（轻纱组的父级）
+    // 的直属子级为单位分拣——含网格且不含段落灯灯球者全藏；灯组
+    // 保留（灯光呼吸是背景的一部分），节点直属的 PointLight 子
+    // 对象不在资产根下、不受影响。
+    const assetRoot = curtains?.parent ?? pavilion;
+    for (const child of assetRoot.children) {
+      if (!subtreeHasMesh(child)) continue;
+      if (subtreeHasLampBulb(child)) continue;
+      this.shellTargets.push(child);
+    }
+    console.info(
+      `[PavilionSystem] stage-1 shell hide targets: ${this.shellTargets.length}`,
+    );
   }
 
   private setupPond(): void {
@@ -174,6 +262,9 @@ export class PavilionSystem extends createSystem({
     for (let i = 0; i < 2; i++) {
       const mist = pond.getObjectByName(`pond-mist-${i}`);
       if (mist instanceof Mesh) {
+        // 薄雾盘是水平透明薄片，第 1 段会切过画像/背景面，亭内
+        // 模式下隐藏（见卷首第三批说明），出亭恢复。
+        this.veilTargets.push(mist);
         const material = mist.material;
         if (material instanceof MeshBasicMaterial) {
           this.mists.push({
@@ -187,6 +278,7 @@ export class PavilionSystem extends createSystem({
     }
     const sunbeam = pond.getObjectByName('pond-sunbeam');
     if (sunbeam instanceof Mesh) {
+      this.veilTargets.push(sunbeam);
       const material = sunbeam.material;
       if (material instanceof MeshBasicMaterial) {
         this.sunbeamMaterial = material;
@@ -283,15 +375,46 @@ export class PavilionSystem extends createSystem({
     );
     this.portraitMaterial = new MeshBasicMaterial({ map: texture });
     const mesh = new Mesh(
-      new PlaneGeometry(1.8, 2.7),
+      new PlaneGeometry(PORTRAIT_WIDTH, PORTRAIT_HEIGHT),
       this.portraitMaterial,
     );
-    // 观众点 [-4.55, -3.15] 朝向 36° 前方 2.6 m，画像正对观众。
-    mesh.position.set(-6.08, 1.85, -5.25);
-    mesh.lookAt(-4.55, 1.6, -3.15);
+    mesh.name = 'pavilion-portrait';
+    // 视轴正中：观众点沿视轴 2.8 m、定心眼高 1.5 m，正对观众。
+    // （第二批摆在距亭轴 1.55 m 处、落在亭体内部被遮挡，本批移出。）
+    mesh.position.set(
+      AUDIENCE_X + VIEW_AXIS.x * PORTRAIT_DISTANCE,
+      PORTRAIT_CENTER_Y,
+      AUDIENCE_Z + VIEW_AXIS.z * PORTRAIT_DISTANCE,
+    );
+    mesh.lookAt(AUDIENCE_X, PORTRAIT_CENTER_Y, AUDIENCE_Z);
     mesh.visible = false;
     this.portrait = mesh;
     this.world.createTransformEntity(mesh, { persistent: true });
+
+    // 莲池背景像（Solomon 亲发晨光莲池图）：立于画像之后 6.2 m，
+    // 大幅 16:9；整面按 BACKDROP_AXIS_SHIFT 左移，让图中亭心对
+    // 正视轴、被居中画像覆住。只在第 1 段与画像一同显形。
+    const backdropTexture = new TextureLoader().load(
+      `${import.meta.env.BASE_URL}images/lotus-pond-backdrop.jpg`,
+    );
+    const backdrop = new Mesh(
+      new PlaneGeometry(BACKDROP_WIDTH, BACKDROP_HEIGHT),
+      new MeshBasicMaterial({ map: backdropTexture }),
+    );
+    backdrop.name = 'pavilion-backdrop';
+    backdrop.position.set(
+      AUDIENCE_X +
+        VIEW_AXIS.x * BACKDROP_DISTANCE -
+        VIEW_RIGHT.x * BACKDROP_AXIS_SHIFT,
+      BACKDROP_CENTER_Y,
+      AUDIENCE_Z +
+        VIEW_AXIS.z * BACKDROP_DISTANCE -
+        VIEW_RIGHT.z * BACKDROP_AXIS_SHIFT,
+    );
+    backdrop.lookAt(AUDIENCE_X, BACKDROP_CENTER_Y, AUDIENCE_Z);
+    backdrop.visible = false;
+    this.backdrop = backdrop;
+    this.world.createTransformEntity(backdrop, { persistent: true });
   }
 
   /** 段落切换时的进出动作：起歌/停歌、退出标志与画像显隐。 */
@@ -306,10 +429,20 @@ export class PavilionSystem extends createSystem({
       if (this.portrait != null) {
         this.portrait.visible = PAVILION_PORTRAIT_MODE;
       }
+      if (this.backdrop != null) {
+        this.backdrop.visible = PAVILION_PORTRAIT_MODE;
+      }
+      // 亭内模式：藏亭体外壳与池面帷幕，只留莲池、段落灯、
+      // 背景像与正中画像（Solomon 第三批亲定）。
+      for (const target of this.shellTargets) target.visible = false;
+      for (const target of this.veilTargets) target.visible = false;
     } else {
       if (wasLotus) requestSongStop();
       if (this.exitPanel != null) this.exitPanel.visible = false;
       if (this.portrait != null) this.portrait.visible = false;
+      if (this.backdrop != null) this.backdrop.visible = false;
+      for (const target of this.shellTargets) target.visible = true;
+      for (const target of this.veilTargets) target.visible = true;
     }
   }
 
